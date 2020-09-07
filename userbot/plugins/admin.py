@@ -108,7 +108,7 @@ async def set_group_photo(gpic):
             f"CHAT: {gpic.chat.title}(`{gpic.chat_id}`)")
 
 
-@borg.on(admin_cmd("promote(?: |$)(.*)"))
+@borg.on(admin_cmd("promote(?: |$)(..*)"))
 @errors_handler
 async def promote(promt):
     """ For .promote command, promotes the replied/tagged person """
@@ -153,7 +153,7 @@ async def promote(promt):
             f"CHAT: {promt.chat.title}(`{promt.chat_id}`)")
 
 
-@borg.on(admin_cmd("demote(?: |$)(.*)"))
+@borg.on(admin_cmd("demote(?: |$)(..*)"))
 @errors_handler
 async def demote(dmod):
     """ For .demote command, demotes the replied/tagged person """
@@ -198,7 +198,7 @@ async def demote(dmod):
             f"CHAT: {dmod.chat.title}(`{dmod.chat_id}`)")
 
 
-@borg.on(admin_cmd("ban(?: |$)(.*)"))
+@borg.on(admin_cmd("ban(?: |$)(..*)"))
 @errors_handler
 async def ban(bon):
     """ For .ban command, bans the replied/tagged person """
@@ -248,7 +248,7 @@ async def ban(bon):
             f"CHAT: {bon.chat.title}(`{bon.chat_id}`)")
 
 
-@borg.on(admin_cmd("unban(?: |$)(.*)"))
+@borg.on(admin_cmd("unban(?: |$)(..*)"))
 @errors_handler
 async def nothanos(unbon):
     """ For .unban command, unbans the replied/tagged person """
@@ -370,7 +370,7 @@ async def endmute(event):
             f"CHAT: {event.chat.title}(`{event.chat_id}`)")
 
 
-@borg.on(admin_cmd("pin($| (.*))"))
+@borg.on(admin_cmd("pin($| (..*))"))
 @errors_handler
 async def pin(msg):
     """ For .pin command, pins the replied/tagged message on the top the chat. """
@@ -406,7 +406,7 @@ async def pin(msg):
             f"LOUD: {not is_silent}")
 
 
-@borg.on(admin_cmd("kick(?: |$)(.*)"))
+@borg.on(admin_cmd("kick(?: |$)(..*)"))
 @errors_handler
 async def kick(usr):
     """ For .kick command, kicks the replied/tagged person from the group. """
@@ -458,7 +458,7 @@ async def _(event):
         await event.delete()
 
 
-@borg.on(sudo_cmd(pattern="(ban|unban)($| (.*))", allow_sudo=True))
+@borg.on(sudo_cmd(pattern="(ban|unban)($| (..*))", allow_sudo=True))
 async def _(event):
     if event.fwd_from:
         return
