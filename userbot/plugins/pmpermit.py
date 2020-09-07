@@ -1,25 +1,24 @@
-import io
 import asyncio
-from .sql_helper import pmpermit_sql as pmpermit_sql
+import io
+import userbot.plugins.sql_helper.pmpermit_sql as pmpermit_sql
 from telethon.tl.functions.users import GetFullUserRequest
-from telethon import events, functions
-from .. import ALIVE_NAME, CMD_HELP
-from ..utils import admin_cmd
-from . import check
+from telethon import events, errors, functions, types
+from userbot import ALIVE_NAME, CMD_HELP
+from userbot.utils import admin_cmd
+from . import check 
 
 PM_WARNS = {}
 PREV_REPLY_MESSAGE = {}
 CACHE = {}
 PMPERMIT_PIC = Config.PMPERMIT_PIC
-DEFAULTUSER = str(
-    ALIVE_NAME) if ALIVE_NAME else "**No name set yet nibba, check pinned message in** @XtraTgBot"
-USER_BOT_WARN_ZERO = "`You were spamming my peru master's inbox, henceforth you are blocked by my master's userbot.` **Now GTFO, i'm playing minecraft** "
+DEFAULTUSER = str(ALIVE_NAME) if ALIVE_NAME else "**No name set yet nibba, check pinned message in** @XtraTgBot"
+USER_BOT_WARN_ZERO = "`You were spamming my inbox, henceforth you are blocked by Redkobras userbot.` **You cant text me anymore** "
 
 if Var.PRIVATE_GROUP_ID is not None:
     @borg.on(admin_cmd(pattern="approve ?(.*)"))
     async def approve_p_m(event):
         if event.fwd_from:
-            return
+           return
         replied_user = await event.client(GetFullUserRequest(event.chat_id))
         firstname = replied_user.user.first_name
         reason = event.pattern_match.group(1)
@@ -43,7 +42,7 @@ if Var.PRIVATE_GROUP_ID is not None:
         chat = await event.get_chat()
         if event.is_private:
             if not pmpermit_sql.is_approved(chat.id):
-                if chat.id not in PM_WARNS:
+                if not chat.id in PM_WARNS:
                     pmpermit_sql.approve(chat.id, "outgoing")
 
     @borg.on(admin_cmd(pattern="disapprove ?(.*)"))
@@ -52,25 +51,25 @@ if Var.PRIVATE_GROUP_ID is not None:
             return
         replied_user = await event.client(GetFullUserRequest(event.chat_id))
         firstname = replied_user.user.first_name
-        event.pattern_match.group(1)
+        reason = event.pattern_match.group(1)
         chat = await event.get_chat()
         if event.is_private:
             if pmpermit_sql.is_approved(chat.id):
                 pmpermit_sql.disapprove(chat.id)
-                await event.edit("disapproved to pm [{}](tg://user?id={})".format(firstname, chat.id))
-
+                await event.edit("disapproved to pm [{}](tg://user?id={})".format(firstname, chat.id))           
+                
     @borg.on(admin_cmd(pattern="block ?(.*)"))
     async def block_p_m(event):
         if event.fwd_from:
             return
         replied_user = await event.client(GetFullUserRequest(event.chat_id))
         firstname = replied_user.user.first_name
-        event.pattern_match.group(1)
+        reason = event.pattern_match.group(1)
         chat = await event.get_chat()
         if event.is_private:
             if pmpermit_sql.is_approved(chat.id):
                 pmpermit_sql.disapprove(chat.id)
-                await event.edit(" ███████▄▄███████████▄  \n▓▓▓▓▓▓█░░░░░░░░░░░░░░█\n▓▓▓▓▓▓█░░░░░░░░░░░░░░█\n▓▓▓▓▓▓█░░░░░░░░░░░░░░█\n▓▓▓▓▓▓█░░░░░░░░░░░░░░█\n▓▓▓▓▓▓█░░░░░░░░░░░░░░█\n▓▓▓▓▓▓███░░░░░░░░░░░░█\n██████▀▀▀█░░░░██████▀  \n░░░░░░░░░█░░░░█  \n░░░░░░░░░░█░░░█  \n░░░░░░░░░░░█░░█  \n░░░░░░░░░░░█░░█  \n░░░░░░░░░░░░▀▀ \n\nYou are blocked. Now You Can't Message Me..[{}](tg://user?id={})".format(firstname, chat.id))
+                await event.edit("You are blocked. Now You Can't Message Me..[{}](tg://user?id={})".format(firstname, chat.id))
                 await asyncio.sleep(3)
                 await event.client(functions.contacts.BlockRequest(chat.id))
 
@@ -114,13 +113,20 @@ if Var.PRIVATE_GROUP_ID is not None:
         message_text = event.message.message
         chat_id = event.from_id
         catid = chat_id
-        message_text.lower()
-        USER_BOT_NO_WARN = (
-            f"[──▄█▀█▄─────────██ \n▄████████▄───▄▀█▄▄▄▄ \n██▀▼▼▼▼▼─▄▀──█▄▄ \n█████▄▲▲▲─▄▄▄▀───▀▄ \n██████▀▀▀▀─▀────────▀▀](tg://user?id={catid})\n\n"
-            "This is auto generated message from cat security service\n\n"
-            f"Hi buddy my master {DEFAULTUSER} haven't approved you yet. so ,"
-            "Leave your name,reason and 10k$ and hopefully you'll get a reply within 2 light years.\n\n"
-            "**Send** `/start` ** so that my master can decide why you're here.**")
+        current_message_text = message_text.lower()
+        USER_BOT_NO_WARN = ("Hey, dies ist eine Automatische Antwort."
+
+"Bitte hinterlasse folgendes in einer Nachricht;
+"-Wer bist du?"
+"-Was möchtest du?"
+"-Woher hast du mein @?"
+
+"~~~"
+                            
+"Please answer everything in one message;"
+"-Who are you?"
+"-What do you want from me"
+"-Where did you get my @ from?.")
         if USER_BOT_NO_WARN == message_text:
             # userbot's should not reply to other userbot's
             # https://core.telegram.org/bots/faq#why-doesn-39t-my-bot-see-messages-from-other-bots
@@ -139,9 +145,8 @@ if Var.PRIVATE_GROUP_ID is not None:
         if sender.verified:
             # don't log verified accounts
             return
-        if (len(event.raw_text) == 1):
-            if check(event.raw_text):
-                return
+        if check(event.raw_text):
+            return
         if not pmpermit_sql.is_approved(chat_id):
             # pm permit
             await do_pm_permit_action(chat_id, event)
@@ -151,7 +156,7 @@ if Var.PRIVATE_GROUP_ID is not None:
             PM_WARNS.update({chat_id: 0})
         if PM_WARNS[chat_id] == Config.MAX_FLOOD_IN_P_M_s:
             r = await event.reply(USER_BOT_WARN_ZERO)
-            await asyncio.sleep(1)
+            await asyncio.sleep(3)
             await event.client(functions.contacts.BlockRequest(chat_id))
             if chat_id in PREV_REPLY_MESSAGE:
                 await PREV_REPLY_MESSAGE[chat_id].delete()
@@ -172,41 +177,46 @@ if Var.PRIVATE_GROUP_ID is not None:
                     silent=True
                 )
                 return
-            except BaseException:
+            except:
                 return
         catid = chat_id
         if PMPERMIT_PIC:
             if Config.CUSTOM_PMPERMIT_TEXT:
-                USER_BOT_NO_WARN = (
-                    Config.CUSTOM_PMPERMIT_TEXT +
-                    '\n\n' +
-                    "**Send** `/start` ** so that my master can decide why you're here.**")
-            else:
-                USER_BOT_NO_WARN = (
-                    "This is auto generated message from cat security service\n\n"
-                    f"Hi buddy my master {DEFAULTUSER} haven't approved you yet. so ,"
-                    "Leave your name,reason and 10k$ and hopefully you'll get a reply within 2 light years.\n\n"
-                    "**Send** `/start` ** so that my master can decide why you're here.**")
-            r = await event.reply(USER_BOT_NO_WARN, file=PMPERMIT_PIC)
+                USER_BOT_NO_WARN = (f"[Hallo](tg://user?id={catid})\n\n"
+                      "This is auto generated message"
+                     f"Bitte hinterlasse folgendes in einer Nachricht,"
+                      "-Wer bist du?\n\n"
+                            "-Was möchtest du?\n\n"
+                            "-Woher hast du mein @?\n\n"
+                            
+                                                 f"Please answer everything in one message,"
+                      "-Who are you?\n\n"
+                            "-What do you want from me?\n\n"
+                            "-Where did you get my @ from?\n\n"
+                      "**Bitte warte auf eine Antwort von mir.**")
+            r = await event.reply( USER_BOT_NO_WARN , file = PMPERMIT_PIC)
         else:
             if Config.CUSTOM_PMPERMIT_TEXT:
-                USER_BOT_NO_WARN = (
-                    Config.CUSTOM_PMPERMIT_TEXT +
-                    '\n\n' +
-                    "**Send** `/start` ** so that my master can decide why you're here.**")
+                USER_BOT_NO_WARN = (Config.CUSTOM_PMPERMIT_TEXT + '\n\n' + "**Bitte warte auf eine Antwort oder du wirst nach der 5ten Nachricht blockiert.**")
             else:
-                USER_BOT_NO_WARN = (
-                    f"[──▄█▀█▄─────────██ \n▄████████▄───▄▀█▄▄▄▄ \n██▀▼▼▼▼▼─▄▀──█▄▄ \n█████▄▲▲▲─▄▄▄▀───▀▄ \n██████▀▀▀▀─▀────────▀▀](tg://user?id={catid})\n\n"
-                    "This is auto generated message from cat security service\n\n"
-                    f"Hi buddy my master {DEFAULTUSER} haven't approved you yet. so ,"
-                    "Leave your name,reason and 10k$ and hopefully you'll get a reply within 2 light years.\n\n"
-                    "**Send** `/start` ** so that my master can decide why you're here.**")
+                USER_BOT_NO_WARN = (f"[Hallo](tg://user?id={catid})\n\n"
+                      "This is auto generated message"
+                     f"Bitte hinterlasse folgendes in einer Nachricht,"
+                      "-Wer bist du?\n\n"
+                            "-Was möchtest du?\n\n"
+                            "-Woher hast du mein @?\n\n"
+                            
+                                                 f"Please answer everything in one message,"
+                      "-Who are you?\n\n"
+                            "-What do you want from me?\n\n"
+                            "-Where did you get my @ from?\n\n"
+                      "**Bitte warte auf eine Antwort von mir.**")
             r = await event.reply(USER_BOT_NO_WARN)
         PM_WARNS[chat_id] += 1
         if chat_id in PREV_REPLY_MESSAGE:
             await PREV_REPLY_MESSAGE[chat_id].delete()
         PREV_REPLY_MESSAGE[chat_id] = r
-
+                   
 CMD_HELP.update({
     "pmpermit":
     ".approve\
